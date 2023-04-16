@@ -1,0 +1,44 @@
+<Project>
+    <PropertyGroup>
+        <Domain>Domain</Domain>
+        <DomainNamespace>$(SolutionName).$(Domain)</DomainNamespace>
+        <InfrastructureNamespace>$(DomainNamespace).Infrastructure</InfrastructureNamespace>
+        <IsInfrastructureProject>$(MSBuildProjectName.StartsWith('Infrastructure'))</IsInfrastructureProject>
+        <IsDomainAbstractionsProject>$(MSBuildProjectName.StartsWith('$(Domain).Abstractions'))</IsDomainAbstractionsProject>
+        <IsDomainExtensionProject>$(MSBuildProjectName.StartsWith('$(Domain).Extensions'))</IsDomainExtensionProject>
+    </PropertyGroup>
+    
+    <!-- by default, prefix all assemblies and namespaces with the solution name -->
+    <PropertyGroup>
+        <AssemblyName>$(SolutionName).$(MSBuildProjectName)</AssemblyName>
+        <RootNamespace>$(SolutionName).$(MSBuildProjectName)</RootNamespace>
+    </PropertyGroup>
+    
+    <Choose>
+        <When Condition="$(IsDomainAbstractionsProject)">
+            <PropertyGroup>
+                <RootNamespace>$(DomainNamespace)</RootNamespace>    
+            </PropertyGroup>
+        </When>
+        <When Condition="$(IsInfrastructureProject)">
+            <PropertyGroup>
+                <RootNamespace>$(InfrastructureNamespace)</RootNamespace>
+            </PropertyGroup>
+
+            <ItemGroup>
+                <ProjectReference Include="$(SolutionDir)/**/$(Domain).Abstractions.csproj" />
+                <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="*" />
+            </ItemGroup>
+        </When>
+        <When Condition="$(IsDomainExtensionProject)">
+            <PropertyGroup>
+                <RootNamespace>$(DomainNamespace)</RootNamespace>
+            </PropertyGroup>
+
+            <ItemGroup>
+                <ProjectReference Include="$(SolutionDir)/**/$(Domain).csproj" />
+                <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="*" />
+            </ItemGroup>
+        </When>
+    </Choose>
+</Project>
